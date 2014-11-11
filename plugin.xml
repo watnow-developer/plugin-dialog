@@ -37,7 +37,7 @@
     <platform name="android">
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="Notification">
-                <param name="android-package" value="org.apache.cordova.dialogs.Notification"/>
+                <param name="android-package" value="jp.watnow.plugins.dialog.Notification"/>
             </feature>
         </config-file>
 
