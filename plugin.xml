@@ -41,7 +41,7 @@
             </feature>
         </config-file>
 
-        <source-file src="src/android/Notification.java" target-dir="src/jp/watnow/plugin/dialog" />
+        <source-file src="src/android/Notification.java" target-dir="src/jp/watnow/plugins/dialog" />
 
         <!-- android specific notification apis -->
         <js-module src="www/android/notification.js" name="notification_android">
