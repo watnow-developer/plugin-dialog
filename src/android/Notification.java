@@ -480,21 +480,21 @@ public class Notification extends CordovaPlugin {
                 dlg.setItems(options, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                     	dialog.dismiss();
-                        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, 0));
+                        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, which));
                     }
                 });
                 dlg.setNegativeButton("Cancel",
                         new AlertDialog.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
-                                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, which));
+                                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, -1));
                             }
                         });
                 dlg.setOnCancelListener(new AlertDialog.OnCancelListener() {
                     public void onCancel(DialogInterface dialog)
                     {
                         dialog.dismiss();
-                        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, 0));
+                        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, -1));
                     }
                 });
 
