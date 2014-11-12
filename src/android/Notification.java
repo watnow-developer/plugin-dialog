@@ -104,6 +104,8 @@ public class Notification extends CordovaPlugin {
         }
         else if (action.equals("progressStop")) {
             this.progressStop();
+        }else if (action.equals("list")) {
+            this.list(args.getString(0), args.getJSONArray(1), callbackContext);
         }
         else {
             return false;
@@ -449,6 +451,59 @@ public class Notification extends CordovaPlugin {
             this.progressDialog = null;
         }
     }
+    
+    /**
+     * Builds and shows a native Android alert with given Strings
+     * @param message           The message the alert should display
+     * @param title             The title of the alert
+     * @param buttonLabel       The label of the button
+     * @param callbackContext   The callback context
+     */
+    public synchronized void list(final String title, final JSONArray data, final CallbackContext callbackContext) {
+    	final CordovaInterface cordova = this.cordova;
+
+    	final String[] options = new String[data.length()];
+    	for(int i = 0;i < data.length();i++){
+    		try {
+				options[i] = data.getString(i);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+    	}
+    	
+        Runnable runnable = new Runnable() {
+            public void run() {
+
+                AlertDialog.Builder dlg = createDialog(cordova); // new AlertDialog.Builder(cordova.getActivity(), AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
+                dlg.setTitle(title);
+                dlg.setCancelable(false);
+                dlg.setItems(options, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                    	dialog.dismiss();
+                        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, 0));
+                    }
+                });
+                dlg.setNegativeButton("Cancel",
+                        new AlertDialog.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, which));
+                            }
+                        });
+                dlg.setOnCancelListener(new AlertDialog.OnCancelListener() {
+                    public void onCancel(DialogInterface dialog)
+                    {
+                        dialog.dismiss();
+                        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, 0));
+                    }
+                });
+
+                changeTextDirection(dlg);
+            };
+        };
+        this.cordova.getActivity().runOnUiThread(runnable);
+    }
+    
     
     @SuppressLint("NewApi")
     private AlertDialog.Builder createDialog(CordovaInterface cordova) {

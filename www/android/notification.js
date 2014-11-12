@@ -17,7 +17,7 @@
  * specific language governing permissions and limitations
  * under the License.
  *
-*/
+ */
 
 var exec = require('cordova/exec');
 
@@ -25,7 +25,7 @@ var exec = require('cordova/exec');
  * Provides Android enhanced notification API.
  */
 module.exports = {
-    activityStart : function(title, message) {
+    activityStart: function (title, message) {
         // If title and message not specified then mimic Android behavior of
         // using default strings.
         if (typeof title === "undefined" && typeof message == "undefined") {
@@ -39,7 +39,7 @@ module.exports = {
     /**
      * Close an activity dialog
      */
-    activityStop : function() {
+    activityStop: function () {
         exec(null, null, 'Notification', 'activityStop', []);
     },
 
@@ -51,14 +51,14 @@ module.exports = {
      * @param {String}
      *            message Message to display in the dialog.
      */
-    progressStart : function(title, message) {
+    progressStart: function (title, message) {
         exec(null, null, 'Notification', 'progressStart', [ title, message ]);
     },
 
     /**
      * Close the progress dialog.
      */
-    progressStop : function() {
+    progressStop: function () {
         exec(null, null, 'Notification', 'progressStop', []);
     },
 
@@ -68,7 +68,17 @@ module.exports = {
      * @param {Number}
      *            value 0-100
      */
-    progressValue : function(value) {
+    progressValue: function (value) {
         exec(null, null, 'Notification', 'progressValue', [ value ]);
+    },
+
+    /**
+     * Display List view Dialog
+     *
+     * @param title{String}
+     *
+     */
+    list: function (title, data, callback) {
+        exec(null, null, 'Notification', 'list', [ title, data, callback ]);
     }
 };
