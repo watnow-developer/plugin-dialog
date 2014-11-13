@@ -34,6 +34,7 @@ import android.content.DialogInterface;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.text.InputType;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -52,6 +53,8 @@ public class Notification extends CordovaPlugin {
     public int confirmResult = -1;
     public ProgressDialog spinnerDialog = null;
     public ProgressDialog progressDialog = null;
+    final static String INPUT_SECURE = "secure";
+    final static String INPUT_NORMAL = "normal";
 
     /**
      * Constructor.
@@ -88,7 +91,11 @@ public class Notification extends CordovaPlugin {
             return true;
         }
         else if (action.equals("prompt")) {
-            this.prompt(args.getString(0), args.getString(1), args.getJSONArray(2), args.getString(3), callbackContext);
+        	String type = INPUT_NORMAL;
+        	if(args.getString(4).equals(INPUT_SECURE)){
+        		type = INPUT_SECURE;
+        	}
+            this.prompt(args.getString(0), args.getString(1), args.getJSONArray(2), args.getString(3),type, callbackContext);
             return true;
         }
         else if (action.equals("activityStart")) {
@@ -273,7 +280,7 @@ public class Notification extends CordovaPlugin {
      * @param buttonLabels      A comma separated list of button labels (Up to 3 buttons)
      * @param callbackContext   The callback context.
      */
-    public synchronized void prompt(final String message, final String title, final JSONArray buttonLabels, final String defaultText, final CallbackContext callbackContext) {
+    public synchronized void prompt(final String message, final String title, final JSONArray buttonLabels, final String defaultText,final String dialogType, final CallbackContext callbackContext) {
   	
         final CordovaInterface cordova = this.cordova;
        
@@ -281,6 +288,10 @@ public class Notification extends CordovaPlugin {
             public void run() {
                 final EditText promptInput =  new EditText(cordova.getActivity());
                 promptInput.setHint(defaultText);
+                Log.d("DialogPlugin",dialogType);
+                if(dialogType.equals(INPUT_SECURE)){
+                	promptInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                }
                 AlertDialog.Builder dlg = createDialog(cordova); // new AlertDialog.Builder(cordova.getActivity(), AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
                 dlg.setMessage(message);
                 dlg.setTitle(title);
