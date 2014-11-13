@@ -79,6 +79,6 @@ module.exports = {
      *
      */
     list: function (title, data, callback) {
-        exec(null, null, 'Notification', 'list', [ title, data, callback ]);
+        exec(callback, null, 'Notification', 'list', [ title, data ]);
     }
 };

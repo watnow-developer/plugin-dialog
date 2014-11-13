@@ -34,6 +34,7 @@ import android.content.DialogInterface;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -106,6 +107,7 @@ public class Notification extends CordovaPlugin {
             this.progressStop();
         }else if (action.equals("list")) {
             this.list(args.getString(0), args.getJSONArray(1), callbackContext);
+            return true;
         }
         else {
             return false;
@@ -473,28 +475,44 @@ public class Notification extends CordovaPlugin {
     	
         Runnable runnable = new Runnable() {
             public void run() {
-
+            	final JSONObject result = new JSONObject();
                 AlertDialog.Builder dlg = createDialog(cordova); // new AlertDialog.Builder(cordova.getActivity(), AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
                 dlg.setTitle(title);
                 dlg.setCancelable(false);
                 dlg.setItems(options, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                     	dialog.dismiss();
-                        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, which));
+                    	try {
+                    		result.put("buttonIndex", 1);
+							result.put("selected", which);
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
+                        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, result));
                     }
                 });
                 dlg.setNegativeButton("Cancel",
                         new AlertDialog.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
-                                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, -1));
+                                try {
+									result.put("buttonIndex", 0);
+								} catch (JSONException e) {
+									e.printStackTrace();
+								}
+                                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, result));
                             }
                         });
                 dlg.setOnCancelListener(new AlertDialog.OnCancelListener() {
                     public void onCancel(DialogInterface dialog)
                     {
                         dialog.dismiss();
-                        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, -1));
+                        try {
+							result.put("buttonIndex", 0);
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
+                        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, result));
                     }
                 });
 
@@ -532,6 +550,7 @@ public class Notification extends CordovaPlugin {
         AlertDialog dialog =  dlg.show();
         if (currentapiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
             TextView messageview = (TextView)dialog.findViewById(android.R.id.message);
+            if(messageview != null)
             messageview.setTextDirection(android.view.View.TEXT_DIRECTION_LOCALE);
         }
     }

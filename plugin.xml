@@ -27,7 +27,6 @@
     <license>Apache 2.0</license>
     <keywords>cordova,notification</keywords>
     <repo>http://gitlab.watnow.jp/watnow/dialogplugin.git</repo>
-    <issue>https://issues.apache.org/jira/browse/CB/component/12320642</issue>
 
     <js-module src="www/notification.js" name="notification">
         <merges target="navigator.notification" />
