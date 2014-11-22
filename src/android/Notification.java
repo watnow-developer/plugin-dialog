@@ -495,7 +495,7 @@ public class Notification extends CordovaPlugin {
                     	dialog.dismiss();
                     	try {
                     		result.put("buttonIndex", 1);
-							result.put("selected", which);
+							result.put("selectedIndex", which);
 						} catch (JSONException e) {
 							e.printStackTrace();
 						}
