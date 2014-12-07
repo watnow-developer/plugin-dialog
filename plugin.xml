@@ -19,8 +19,8 @@
 -->
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-           id="jp.watnow.plugins.dialog"
-      version="0.2.0">
+        id="jp.watnow.plugins.dialog"
+        version="1.1.0">
 
     <name>Notification</name>
     <description>Cordova Notification Plugin</description>
@@ -39,13 +39,7 @@
                 <param name="android-package" value="jp.watnow.plugins.dialog.Notification"/>
             </feature>
         </config-file>
-
         <source-file src="src/android/Notification.java" target-dir="src/jp/watnow/plugins/dialog" />
-
-        <!-- android specific notification apis -->
-        <js-module src="www/android/notification.js" name="notification_android">
-            <merges target="navigator.notification" />
-        </js-module>
 
     </platform>
 
@@ -57,9 +51,7 @@
             </feature>
         </config-file>
         <header-file src="src/ios/CDVNotification.h" />
-	    <source-file src="src/ios/CDVNotification.m" />
-	    <resource-file src="src/ios/CDVNotification.bundle" />
-		<framework src="AudioToolbox.framework" weak="true" />
+        <source-file src="src/ios/CDVNotification.m" />
     </platform>
 
 </plugin>

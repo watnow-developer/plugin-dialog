@@ -18,6 +18,8 @@
 */
 package jp.watnow.plugins.dialog;
 
+import jp.watnow.timetable.R;
+
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
@@ -31,11 +33,10 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.text.InputType;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -79,10 +80,7 @@ public class Notification extends CordovaPlugin {
     	 */
     	if(this.cordova.getActivity().isFinishing()) return true;
     	
-        if (action.equals("beep")) {
-            this.beep(args.getLong(0));
-        }
-        else if (action.equals("alert")) {
+    	if (action.equals("alert")) {
             this.alert(args.getString(0), args.getString(1), args.getString(2), callbackContext);
             return true;
         }
@@ -98,22 +96,11 @@ public class Notification extends CordovaPlugin {
             this.prompt(args.getString(0), args.getString(1), args.getJSONArray(2), args.getString(3),type, callbackContext);
             return true;
         }
-        else if (action.equals("activityStart")) {
-            this.activityStart(args.getString(0), args.getString(1));
-        }
-        else if (action.equals("activityStop")) {
-            this.activityStop();
-        }
-        else if (action.equals("progressStart")) {
-            this.progressStart(args.getString(0), args.getString(1));
-        }
-        else if (action.equals("progressValue")) {
-            this.progressValue(args.getInt(0));
-        }
-        else if (action.equals("progressStop")) {
-            this.progressStop();
-        }else if (action.equals("list")) {
+        else if (action.equals("list")) {
             this.list(args.getString(0), args.getJSONArray(1), callbackContext);
+            return true;
+        } else if (action.equals("login")) {
+            this.login(args.getString(0), args.getString(1), args.getJSONArray(2), args.getJSONArray(3), callbackContext);
             return true;
         }
         else {
@@ -121,42 +108,13 @@ public class Notification extends CordovaPlugin {
         }
 
         // Only alert and confirm are async.
-        callbackContext.success();
-        return true;
+        //callbackContext.success();
+        //return true;
     }
 
     //--------------------------------------------------------------------------
     // LOCAL METHODS
     //--------------------------------------------------------------------------
-
-    /**
-     * Beep plays the default notification ringtone.
-     *
-     * @param count     Number of times to play notification
-     */
-    public void beep(final long count) {
-        cordova.getThreadPool().execute(new Runnable() {
-            public void run() {
-                Uri ringtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-                Ringtone notification = RingtoneManager.getRingtone(cordova.getActivity().getBaseContext(), ringtone);
-
-                // If phone is not set to silent mode
-                if (notification != null) {
-                    for (long i = 0; i < count; ++i) {
-                        notification.play();
-                        long timeout = 5000;
-                        while (notification.isPlaying() && (timeout > 0)) {
-                            timeout = timeout - 100;
-                            try {
-                                Thread.sleep(100);
-                            } catch (InterruptedException e) {
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
 
     /**
      * Builds and shows a native Android alert with given Strings
@@ -369,103 +327,6 @@ public class Notification extends CordovaPlugin {
     }
 
     /**
-     * Show the spinner.
-     *
-     * @param title     Title of the dialog
-     * @param message   The message of the dialog
-     */
-    public synchronized void activityStart(final String title, final String message) {
-        if (this.spinnerDialog != null) {
-            this.spinnerDialog.dismiss();
-            this.spinnerDialog = null;
-        }
-        final Notification notification = this;
-        final CordovaInterface cordova = this.cordova;
-        Runnable runnable = new Runnable() {
-            public void run() {
-                notification.spinnerDialog = createProgressDialog(cordova); // new ProgressDialog(cordova.getActivity(), AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
-                notification.spinnerDialog.setTitle(title);
-                notification.spinnerDialog.setMessage(message);
-                notification.spinnerDialog.setCancelable(false);
-                notification.spinnerDialog.setIndeterminate(true);
-                notification.spinnerDialog.setOnCancelListener(
-                        new DialogInterface.OnCancelListener() {
-                            public void onCancel(DialogInterface dialog) {
-                                notification.spinnerDialog = null;
-                            }
-                        });
-                notification.spinnerDialog.show();
-            }
-        };
-        this.cordova.getActivity().runOnUiThread(runnable);
-    }
-
-    /**
-     * Stop spinner.
-     */
-    public synchronized void activityStop() {
-        if (this.spinnerDialog != null) {
-            this.spinnerDialog.dismiss();
-            this.spinnerDialog = null;
-        }
-    }
-
-    /**
-     * Show the progress dialog.
-     *
-     * @param title     Title of the dialog
-     * @param message   The message of the dialog
-     */
-    public synchronized void progressStart(final String title, final String message) {
-        if (this.progressDialog != null) {
-            this.progressDialog.dismiss();
-            this.progressDialog = null;
-        }
-        final Notification notification = this;
-        final CordovaInterface cordova = this.cordova;
-        Runnable runnable = new Runnable() {
-            public void run() {
-                notification.progressDialog = createProgressDialog(cordova); // new ProgressDialog(cordova.getActivity(), AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
-                notification.progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                notification.progressDialog.setTitle(title);
-                notification.progressDialog.setMessage(message);
-                notification.progressDialog.setCancelable(false);
-                notification.progressDialog.setMax(100);
-                notification.progressDialog.setProgress(0);
-                notification.progressDialog.setOnCancelListener(
-                        new DialogInterface.OnCancelListener() {
-                            public void onCancel(DialogInterface dialog) {
-                                notification.progressDialog = null;
-                            }
-                        });
-                notification.progressDialog.show();
-            }
-        };
-        this.cordova.getActivity().runOnUiThread(runnable);
-    }
-
-    /**
-     * Set value of progress bar.
-     *
-     * @param value     0-100
-     */
-    public synchronized void progressValue(int value) {
-        if (this.progressDialog != null) {
-            this.progressDialog.setProgress(value);
-        }
-    }
-
-    /**
-     * Stop progress dialog.
-     */
-    public synchronized void progressStop() {
-        if (this.progressDialog != null) {
-            this.progressDialog.dismiss();
-            this.progressDialog = null;
-        }
-    }
-    
-    /**
      * Builds and shows a native Android alert with given Strings
      * @param message           The message the alert should display
      * @param title             The title of the alert
@@ -533,6 +394,81 @@ public class Notification extends CordovaPlugin {
         this.cordova.getActivity().runOnUiThread(runnable);
     }
     
+    /**
+     * 
+     * @param message
+     * @param title
+     * @param buttonLabels
+     * @param defaultTexts
+     * @param callbackContext
+     */
+    public synchronized void login(final String title, final String message, final JSONArray buttonLabels, final JSONArray defaultTexts,final CallbackContext callbackContext) {
+      	
+        final CordovaInterface cordova = this.cordova;
+       
+        Runnable runnable = new Runnable() {
+            public void run() {
+            	View layout = LayoutInflater.from(cordova.getActivity()).inflate(R.layout.dialog_login,null);
+            	final EditText usernameInput =  (EditText) layout.findViewById(R.id.username);
+                final EditText passwordInput =  (EditText) layout.findViewById(R.id.password);
+                try {
+                	usernameInput.setHint(defaultTexts.getString(0));
+                	passwordInput.setHint(defaultTexts.getString(1));
+                } catch (JSONException e1){}
+
+                AlertDialog.Builder dlg = createDialog(cordova); // new AlertDialog.Builder(cordova.getActivity(), AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
+                dlg.setMessage(message);
+                dlg.setTitle(title);
+                dlg.setCancelable(false);
+                
+                dlg.setView(layout);
+                
+                final JSONObject result = new JSONObject();
+                
+                    try {
+                        dlg.setNegativeButton(buttonLabels.getString(0),
+                            new AlertDialog.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                    try {
+                                        result.put("buttonIndex",1);
+                                        result.put("input1", usernameInput.getText());		
+                                        result.put("input2", passwordInput.getText());		
+                                    } catch (JSONException e) { e.printStackTrace(); }
+                                    callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, result));
+                                }
+                            });
+                    } catch (JSONException e) { }
+
+                    try {
+                        dlg.setPositiveButton(buttonLabels.getString(1),
+                            new AlertDialog.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                    try {
+                                        result.put("buttonIndex",3);
+                                    } catch (JSONException e) { e.printStackTrace(); }
+                                    callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, result));
+                                }
+                            });
+                    } catch (JSONException e) { }
+                    
+                dlg.setOnCancelListener(new AlertDialog.OnCancelListener() {
+                    public void onCancel(DialogInterface dialog){
+                        dialog.dismiss();
+                        try {
+                            result.put("buttonIndex",0);
+                        } catch (JSONException e) { e.printStackTrace(); }
+                        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, result));
+                    }
+                });
+
+                changeTextDirection(dlg);
+            };
+        };
+        this.cordova.getActivity().runOnUiThread(runnable);
+    }
+    
     
     @SuppressLint("NewApi")
     private AlertDialog.Builder createDialog(CordovaInterface cordova) {
@@ -541,16 +477,6 @@ public class Notification extends CordovaPlugin {
             return new AlertDialog.Builder(cordova.getActivity(), AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
         } else {
             return new AlertDialog.Builder(cordova.getActivity());
-        }
-    }
-
-    @SuppressLint("InlinedApi")
-    private ProgressDialog createProgressDialog(CordovaInterface cordova) {
-        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
-        if (currentapiVersion >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            return new ProgressDialog(cordova.getActivity(), AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
-        } else {
-            return new ProgressDialog(cordova.getActivity());
         }
     }
     

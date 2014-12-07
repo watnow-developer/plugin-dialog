@@ -101,13 +101,31 @@ module.exports = {
 	},
 
 	/**
-	 * Causes the device to beep.
-	 * On Android, the default notification ringtone is played "count" times.
+	 * Display List view Dialog
 	 *
-	 * @param {Integer} count       The number of beeps.
+	 * @param {String} title
+	 * @param {array} data
+	 * @param {function} callback
 	 */
-	beep: function (count) {
-		var defaultedCount = count || 1;
-		exec(null, null, "Notification", "beep", [defaultedCount]);
+	list: function (title, data, callback) {
+		var _title = title || "List";
+		var _data = data || ["list1","list2"];
+		exec(callback, null, 'Notification', 'list', [_title, _data]);
+	},
+
+	/**
+	 * Login情報の入力ダイアログ
+	 * @param {string} title
+	 * @param {string} message
+	 * @param {function} callback
+	 * @param {array} buttonLabels
+	 * @param {array} defaultTexts
+	 */
+	login: function (title, message, callback, buttonLabels, defaultTexts) {
+		var _title = title || "Login";
+		var _message = message || "Please fill";
+		var _buttonLabels = buttonLabels || ["Login", "Cancel"];
+		var _defaultTexts = defaultTexts || ["ID", "PASSWORD"];
+		exec(callback, null, 'Notification', 'login', [_title, _message, _buttonLabels, _defaultTexts]);
 	}
 };
