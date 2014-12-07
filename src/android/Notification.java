@@ -412,8 +412,10 @@ public class Notification extends CordovaPlugin {
             	final EditText usernameInput =  (EditText) layout.findViewById(R.id.username);
                 final EditText passwordInput =  (EditText) layout.findViewById(R.id.password);
                 try {
-                	usernameInput.setHint(defaultTexts.getString(0));
-                	passwordInput.setHint(defaultTexts.getString(1));
+                	usernameInput.setHint("ID");
+                    usernameInput.setText(defaultTexts.getString(0));
+                    passwordInput.setHint("PASSWORD");
+                    passwordInput.setText(defaultTexts.getString(1));
                 } catch (JSONException e1){}
 
                 AlertDialog.Builder dlg = createDialog(cordova); // new AlertDialog.Builder(cordova.getActivity(), AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
