@@ -101,31 +101,18 @@ module.exports = {
 	},
 
 	/**
-	 * Display List view Dialog
-	 *
-	 * @param {String} title
-	 * @param {array} data
-	 * @param {function} callback
-	 */
-	list: function (title, data, callback) {
-		var _title = title || "List";
-		var _data = data || ["list1","list2"];
-		exec(callback, null, 'Notification', 'list', [_title, _data]);
-	},
-
-	/**
 	 * Login情報の入力ダイアログ
-	 * @param {string} title
-	 * @param {string} message
+	 * @param {String} title
+	 * @param {String} message
 	 * @param {function} callback
-	 * @param {array} buttonLabels
-	 * @param {array} defaultTexts
+	 * @param {Array} buttonLabels
+	 * @param {Array} defaultTexts
 	 */
 	login: function (title, message, callback, buttonLabels, defaultTexts) {
 		var _title = title || "Login";
 		var _message = message || "Please fill";
 		var _buttonLabels = buttonLabels || ["Login", "Cancel"];
-		var _defaultTexts = defaultTexts || ["ID", "PASSWORD"];
+		var _defaultTexts = defaultTexts || ["",""];
 		exec(callback, null, 'Notification', 'login', [_title, _message, _buttonLabels, _defaultTexts]);
 	}
 };

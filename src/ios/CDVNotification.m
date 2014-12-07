@@ -24,8 +24,7 @@
 #define DIALOG_TYPE_ALERT @"alert"
 #define DIALOG_TYPE_PROMPT @"prompt"
 #define DIALOG_TYPE_SECURE @"secure"
-
-static void soundCompletionCallback(SystemSoundID ssid, void* data);
+#define DIALOG_TYPE_LOGIN @"login"
 
 @implementation CDVNotification
 
@@ -39,7 +38,7 @@ static void soundCompletionCallback(SystemSoundID ssid, void* data);
  *  callbackId    The commmand callback id.
  *  dialogType    The type of alert view [alert | prompt].
  */
-- (void)showDialogWithMessage:(NSString*)message title:(NSString*)title buttons:(NSArray*)buttons defaultText:(NSString*)defaultText callbackId:(NSString*)callbackId dialogType:(NSString*)dialogType
+- (void)showDialogWithMessage:(NSString*)message title:(NSString*)title buttons:(NSArray*)buttons defaultTexts:(NSArray*)defaultTexts callbackId:(NSString*)callbackId dialogType:(NSString*)dialogType
 {
     CDVAlertView* alertView = [[CDVAlertView alloc]
                                initWithTitle:title
@@ -59,11 +58,19 @@ static void soundCompletionCallback(SystemSoundID ssid, void* data);
     if ([dialogType isEqualToString:DIALOG_TYPE_SECURE]) {
         alertView.alertViewStyle = UIAlertViewStyleSecureTextInput;
         UITextField* textField = [alertView textFieldAtIndex:0];
-        textField.text = defaultText;
+        textField.text = [defaultTexts objectAtIndex:0];
     }else if([dialogType isEqualToString:DIALOG_TYPE_PROMPT]){
         alertView.alertViewStyle = UIAlertViewStylePlainTextInput;
         UITextField* textField = [alertView textFieldAtIndex:0];
-        textField.text = defaultText;
+        textField.text = [defaultTexts objectAtIndex:0];
+    }else if([dialogType isEqualToString:DIALOG_TYPE_LOGIN]){
+        alertView.alertViewStyle = UIAlertViewStyleLoginAndPasswordInput;
+        UITextField* idField = [alertView textFieldAtIndex:0];
+        idField.text = [defaultTexts objectAtIndex:0];
+        idField.placeholder = @"ID";
+        UITextField* passField = [alertView textFieldAtIndex:1];
+        passField.text = [defaultTexts objectAtIndex:1];
+        passField.placeholder = @"PASSWORD";
     }
     
     [alertView show];
@@ -76,7 +83,7 @@ static void soundCompletionCallback(SystemSoundID ssid, void* data);
     NSString* title = [command argumentAtIndex:1];
     NSString* buttons = [command argumentAtIndex:2];
     
-    [self showDialogWithMessage:message title:title buttons:@[buttons] defaultText:nil callbackId:callbackId dialogType:DIALOG_TYPE_ALERT];
+    [self showDialogWithMessage:message title:title buttons:@[buttons] defaultTexts:nil callbackId:callbackId dialogType:DIALOG_TYPE_ALERT];
 }
 
 - (void)confirm:(CDVInvokedUrlCommand*)command
@@ -86,7 +93,7 @@ static void soundCompletionCallback(SystemSoundID ssid, void* data);
     NSString* title = [command argumentAtIndex:1];
     NSArray* buttons = [command argumentAtIndex:2];
     
-    [self showDialogWithMessage:message title:title buttons:buttons defaultText:nil callbackId:callbackId dialogType:DIALOG_TYPE_ALERT];
+    [self showDialogWithMessage:message title:title buttons:buttons defaultTexts:nil callbackId:callbackId dialogType:DIALOG_TYPE_ALERT];
 }
 
 - (void)prompt:(CDVInvokedUrlCommand*)command
@@ -96,13 +103,27 @@ static void soundCompletionCallback(SystemSoundID ssid, void* data);
     NSString* title = [command argumentAtIndex:1];
     NSArray* buttons = [command argumentAtIndex:2];
     NSString* defaultText = [command argumentAtIndex:3];
+    NSArray* defaultTexts = [NSArray arrayWithObjects:defaultText, nil];
     NSString* dialogType = [command argumentAtIndex:4];
     
     if ([dialogType isEqualToString:DIALOG_TYPE_SECURE]) {
-        [self showDialogWithMessage:message title:title buttons:buttons defaultText:defaultText callbackId:callbackId dialogType:DIALOG_TYPE_SECURE];
+        [self showDialogWithMessage:message title:title buttons:buttons defaultTexts:defaultTexts callbackId:callbackId dialogType:DIALOG_TYPE_SECURE];
     }else{
-        [self showDialogWithMessage:message title:title buttons:buttons defaultText:defaultText callbackId:callbackId dialogType:DIALOG_TYPE_PROMPT];
+        [self showDialogWithMessage:message title:title buttons:buttons defaultTexts:defaultTexts callbackId:callbackId dialogType:DIALOG_TYPE_PROMPT];
     }
+    
+}
+
+- (void)login:(CDVInvokedUrlCommand*)command
+{
+    NSString* callbackId = command.callbackId;
+    NSString* message = [command argumentAtIndex:1];
+    NSString* title = [command argumentAtIndex:0];
+    NSArray* buttons = [command argumentAtIndex:2];
+    NSArray* defaultTexts = [command argumentAtIndex:3];
+    
+    
+    [self showDialogWithMessage:message title:title buttons:buttons defaultTexts:defaultTexts callbackId:callbackId dialogType:DIALOG_TYPE_LOGIN];
     
 }
 
@@ -118,7 +139,19 @@ static void soundCompletionCallback(SystemSoundID ssid, void* data);
     if (alertView.alertViewStyle == UIAlertViewStyleDefault) {
         // For alert and confirm, return button index as int back to JS.
         result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:(int)(buttonIndex + 1)];
-    } else {
+    }
+    else if(alertView.alertViewStyle == UIAlertViewStyleLoginAndPasswordInput){
+        // For prompt, return button index and input text back to JS.
+        NSString* value0 = [[alertView textFieldAtIndex:0] text];
+        NSString* value1 = [[alertView textFieldAtIndex:1] text];
+        NSDictionary* info = @{
+                               @"buttonIndex":@(buttonIndex + 1),
+                               @"input1":(value0 ? value0 : [NSNull null]),
+                               @"input2":(value1 ? value1 : [NSNull null])
+                               };
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:info];
+    }
+    else {
         // For prompt, return button index and input text back to JS.
         NSString* value0 = [[alertView textFieldAtIndex:0] text];
         NSDictionary* info = @{
@@ -130,33 +163,6 @@ static void soundCompletionCallback(SystemSoundID ssid, void* data);
     [self.commandDelegate sendPluginResult:result callbackId:cdvAlertView.callbackId];
 }
 
-static void playBeep(int count) {
-    SystemSoundID completeSound;
-    NSInteger cbDataCount = count;
-    NSURL* audioPath = [[NSBundle mainBundle] URLForResource:@"CDVNotification.bundle/beep" withExtension:@"wav"];
-#if __has_feature(objc_arc)
-    AudioServicesCreateSystemSoundID((__bridge CFURLRef)audioPath, &completeSound);
-#else
-    AudioServicesCreateSystemSoundID((CFURLRef)audioPath, &completeSound);
-#endif
-    AudioServicesAddSystemSoundCompletion(completeSound, NULL, NULL, soundCompletionCallback, (void*)(cbDataCount-1));
-    AudioServicesPlaySystemSound(completeSound);
-}
-
-static void soundCompletionCallback(SystemSoundID  ssid, void* data) {
-    int count = (int)data;
-    AudioServicesRemoveSystemSoundCompletion (ssid);
-    AudioServicesDisposeSystemSoundID(ssid);
-    if (count > 0) {
-        playBeep(count);
-    }
-}
-
-- (void)beep:(CDVInvokedUrlCommand*)command
-{
-    NSNumber* count = [command.arguments objectAtIndex:0 withDefault:[NSNumber numberWithInt:1]];
-    playBeep([count intValue]);
-}
 
 
 @end

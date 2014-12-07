@@ -20,7 +20,7 @@
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         id="jp.watnow.plugins.dialog"
-        version="1.1.0">
+        version="1.1.1">
 
     <name>Notification</name>
     <description>Cordova Notification Plugin</description>
@@ -40,6 +40,11 @@
             </feature>
         </config-file>
         <source-file src="src/android/Notification.java" target-dir="src/jp/watnow/plugins/dialog" />
+
+        <!-- android specific notification apis -->
+        <js-module src="www/android/notification.js" name="notification_android">
+            <merges target="navigator.notification" />
+        </js-module>
 
     </platform>
 
