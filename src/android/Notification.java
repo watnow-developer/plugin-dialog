@@ -18,8 +18,6 @@
 */
 package jp.watnow.plugins.dialog;
 
-import jp.watnow.timetable.R;
-
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
@@ -35,9 +33,8 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.text.InputType;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 
@@ -408,15 +405,22 @@ public class Notification extends CordovaPlugin {
        
         Runnable runnable = new Runnable() {
             public void run() {
-            	View layout = LayoutInflater.from(cordova.getActivity()).inflate(R.layout.dialog_login,null);
-            	final EditText usernameInput =  (EditText) layout.findViewById(R.id.username);
-                final EditText passwordInput =  (EditText) layout.findViewById(R.id.password);
+            	LinearLayout layout = new LinearLayout(cordova.getActivity());
+                layout.setOrientation(LinearLayout.VERTICAL);
+                layout.setPadding(10, 0, 10, 0);
+                final EditText usernameInput = new EditText(cordova.getActivity());
+                usernameInput.setRawInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_NORMAL);
+                final EditText passwordInput = new EditText(cordova.getActivity());
+                passwordInput.setRawInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_PASSWORD);
                 try {
-                	usernameInput.setHint("ID");
+                    usernameInput.setHint("ID");
                     usernameInput.setText(defaultTexts.getString(0));
                     passwordInput.setHint("PASSWORD");
                     passwordInput.setText(defaultTexts.getString(1));
                 } catch (JSONException e1){}
+
+                layout.addView(usernameInput, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT));
+                layout.addView(passwordInput, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT));
 
                 AlertDialog.Builder dlg = createDialog(cordova); // new AlertDialog.Builder(cordova.getActivity(), AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
                 dlg.setMessage(message);
