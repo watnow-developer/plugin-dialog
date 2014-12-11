@@ -409,9 +409,9 @@ public class Notification extends CordovaPlugin {
                 layout.setOrientation(LinearLayout.VERTICAL);
                 layout.setPadding(10, 0, 10, 0);
                 final EditText usernameInput = new EditText(cordova.getActivity());
-                usernameInput.setRawInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_NORMAL);
+                usernameInput.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_NORMAL);
                 final EditText passwordInput = new EditText(cordova.getActivity());
-                passwordInput.setRawInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                passwordInput.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_PASSWORD);
                 try {
                     usernameInput.setHint("ID");
                     usernameInput.setText(defaultTexts.getString(0));
